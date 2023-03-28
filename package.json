@@ -1,0 +1,23 @@
+{
+  "name": "salesforce-nodejs-intergration",
+  "version": "1.0.0",
+  "description": "A Salesforce integration project",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Catherine Banda",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "jsforce": "^1.11.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3"
+  }
+}

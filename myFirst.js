@@ -1,96 +1,87 @@
-var express = require('express');//Adding Express 
-
-var http = require('http');//Adding http 
-
-var jsforce = require('jsforce');//Adding JSforce 
-
+var express = require("express"); // Adding Express
+var http = require("http"); // Adding http
+var jsforce = require("jsforce"); // Adding JSforce
 var application = express();
 var app = express();
+const dotenv = require("dotenv");
+dotenv.config();
 
-app.set('port', process.env.PORT || 3001);
+const PORT = process.env.PORT || 3001;
+const username = process.env.SF_USERNAME;
+const password = process.env.SF_PASSWORD;
 
-app.get('/', work(req, res)); 
+app.set("port", process.env.PORT || 3001);
 
-    var conn = new jsforce.Connection({ 
+app.get("/", function (req, res) {
+  work(req, res);
+});
 
-// you can change the login URL to interface with the sandbox or prerelease env. 
+var conn = new jsforce.Connection({
+  //   oauth2: {
+  //     // you can change loginUrl to connect to sandbox or prerelease env.
+  //     loginUrl: process.env.LOGIN_URL,
+  //     clientId: process.env.SF_CLIENT_ID,
+  //     clientSecret: process.env.SF_CLIENT_SECRET,
+  //     redirectUri: process.env.SF_REDIRECT_URI,
+  //   },
+  //   instanceUrl: process.env.SF_INSTANCE_URL,
+  //   accessToken: process.env.SF_ACCESS_TOKEN,
+  //   refreshToken: process.env.SF_REFRESH_TOKEN,
+});
 
-// loginUrl : 'https://test.salesforce.com' 
+//var username = "cathy@banco1.com";
+//var secretPhrase = "baraka6571#ZbxldFMdBBdItk549SnzgmWn";
 
-})
+conn.login(username, password, (err, userInfo) => {
+  // Now you can get the access token and instance URL information.
+  // Save them to establish a connection next time.
+  console.log(conn.accessToken);
+  console.log(conn.instanceUrl);
+  // logged in user property
+  console.log("User ID: " + userInfo.id);
+  console.log("Org ID: " + userInfo.organizationId);
+});
 
-     username = 'asifjee@salesforce.com',
+// Perform SOQL Query
+var records = [];
+conn.query("SELECT Id, Name FROM Account", function (err, result) {
+  if (err) {
+    return console.error(err);
+  }
+  console.log("total : " + result.totalSize);
+  console.log("fetched : " + result.records.length);
+});
 
-    secretPhrase = 'PassWord+SecurityToken',
-
-    conn.login(username, secretPhrase, function(err, userInfo) { 
-
-    return console.error(err); })
-
-    //Now, you can get the entrance token and example URL data. 
-
-        // Save them to set up association sometime later.
-
-            console.log(conn.accessToken),
-
-    console.log(conn, instanceUrl) 
-
-    //signed in client property 
-
-    console.log("User ID: " + userInfo.id),
-
-    console.log("Org ID: " + userInfo.organizationId),
-
-    //Perform SOQL Here 
-
-    records = [],
-
-    conn,query("SELECT Id, Name FROM Account", function(err, result) { 
-
-     return console.error(err); 
-
-        console.log("total : " + result.totalSize);
-
-        console.log("fetched : " + result.records.length);
-
-    });
-
-//Perform account inclusion 
-
+// Perform account insertion
 var accounts = [
-
-    { Name: 'MyAccount 1', site: 'heySalesforce.org' },
-
-    { Name: 'MyAccount 2', site: 'heySalesforce.org' },
-
-    { Name: 'MyAccount 3', site: 'heySalesforce.org' },
-
-    { Name: 'MyAccount 3', site: 'heySalesforce.org' }
-
+  { Name: "MyAccount 1", Site: "heySalesforce.org" },
+  { Name: "MyAccount 2", Site: "heySalesforce.org" },
+  { Name: "MyAccount 3", Site: "heySalesforce.org" },
+  { Name: "MyAccount 4", Site: "heySalesforce.org" },
 ];
 
-conn.bulk.load("Account", "embed", accounts, function (err, rets) { 
-
- { return console.error(err); }
-
-    for (var i = 0; I < rets.length; i++) {
-
-        (rets[i].success);
-        
-        else {
-
-            console.log("#" + (i + 1) + " mistake happened, message = " + rets[i].errors.join(', '));
-
-        }
-
+conn.bulk.load("Account", "insert", accounts, function (err, rets) {
+  if (err) {
+    return console.error(err);
+  }
+  for (var i = 0; i < rets.length; i++) {
+    if (rets[i].success) {
+      console.log("#" + (i + 1) + " loaded successfully, id = " + rets[i].id);
+    } else {
+      console.log(
+        "#" +
+          (i + 1) +
+          " error occurred, message = " +
+          rets[i].errors.join(", ")
+      );
     }
+  }
+});
 
-}); 
+app.get("/", function (req, res) {
+  res.send("heySalesforce: JSForce Connection Successful!");
+});
 
-    res.send('heySalesforce : JSForce Connect Successed!');
- 
-
-
-http.createServer(application).tune in (app.get('port'), work())
-
-    //console.log('Express server tuning in on port ' + app.get('port'));
+http.createServer(application).listen(app.get("port"), function () {
+  console.log("Express server listening on port " + app.get("port"));
+});
